@@ -4,6 +4,7 @@ using System.ServiceProcess;
 using Common.Logging;
 using Microsoft.Owin.Hosting;
 using NuGet;
+using System.Threading;
 
 namespace Klondike.SelfHost
 {
@@ -75,10 +76,23 @@ namespace Klondike.SelfHost
 
             OnStart(new string[0]);
 
+            if (Type.GetType("Mono.Runtime") == null)
+                ConsoleWait();
+            else
+                SignalWait(); // no console under docker
+            OnStop();
+        }
+
+        private void SignalWait()
+        {
+            //TODO: handle Signals instead
+            Thread.Sleep(Timeout.Infinite);
+        }
+
+        private void ConsoleWait()
+        {
             Console.WriteLine("Press <enter> to stop.");
             Console.ReadLine();
-
-            OnStop();
         }
     }
 }
